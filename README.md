@@ -1,7 +1,7 @@
 <div align="center">
 
 # 🏢 Elevador Inteligente
-### Simulação com Arduino UNO · Tinkercad
+### Desenvolvendo elevador no arduino no Tinkercad (Paulo)
 
 <br>
 
