@@ -1,28 +1,33 @@
 // BOTÕES
-int botaoVerde = 2;
-int botaoVermelho = 4;
-int botaoAmarelo = 6;
-int botaoCinza = 8;
-int botaoAzul = 10;
-int botaoMarrom = 12;
+const int botaoVerde = 2;     // Andar 1
+const int botaoVermelho = 4;  // Andar 2
+const int botaoAmarelo = 6;   // Andar 3
+const int botaoCinza = 8;     // Andar 4
+const int botaoAzul = 10;     // Andar 5
+const int botaoMarrom = 12;   // Andar 6
 
 // LEDS
-int ledVerde = 3;
-int ledVermelho = 5;
-int ledAmarelo = 7;
-int ledCinza = 9;
-int ledAzul = 11;
-int ledMarrom = 13;
+const int ledVerde = 3;       // Andar 1
+const int ledVermelho = 5;    // Andar 2
+const int ledAmarelo = 7;     // Andar 3
+const int ledCinza = 9;       // Andar 4
+const int ledAzul = 11;       // Andar 5
+const int ledMarrom = 13;     // Andar 6
 
-void setup()
-{
-  // BOTÕES
-  pinMode(botaoVerde, INPUT);
-  pinMode(botaoVermelho, INPUT);
-  pinMode(botaoAmarelo, INPUT);
-  pinMode(botaoCinza, INPUT);
-  pinMode(botaoAzul, INPUT);
-  pinMode(botaoMarrom, INPUT);
+// Variáveis de controle de tempo
+unsigned long tempoInicio = 0;
+const long tempoEspera = 5000; // 5 segundos por andar
+bool elevadorEmUso = false;
+int andarDestino = 0;
+
+void setup() {
+  // BOTÕES (com INPUT_PULLUP para não precisar de resistores externos)
+  pinMode(botaoVerde, INPUT_PULLUP);
+  pinMode(botaoVermelho, INPUT_PULLUP);
+  pinMode(botaoAmarelo, INPUT_PULLUP);
+  pinMode(botaoCinza, INPUT_PULLUP);
+  pinMode(botaoAzul, INPUT_PULLUP);
+  pinMode(botaoMarrom, INPUT_PULLUP);
 
   // LEDS
   pinMode(ledVerde, OUTPUT);
@@ -31,74 +36,41 @@ void setup()
   pinMode(ledCinza, OUTPUT);
   pinMode(ledAzul, OUTPUT);
   pinMode(ledMarrom, OUTPUT);
+  
+  apagarTodos();
 }
 
-void loop()
-{
-  // LED VERDE
-  if (digitalRead(botaoVerde) == LOW)
-  {
-    apagarTodos();
-    delay(200);
-    digitalWrite(ledVerde, HIGH);
-    delay(5000);
-    digitalWrite(ledVerde, LOW);
+void loop() {
+  // Se o elevador não estiver em movimento, lê os botões
+  if (!elevadorEmUso) {
+    if (digitalRead(botaoVerde) == LOW) { iniciarAndar(ledVerde); }
+    else if (digitalRead(botaoVermelho) == LOW) { iniciarAndar(ledVermelho); }
+    else if (digitalRead(botaoAmarelo) == LOW) { iniciarAndar(ledAmarelo); }
+    else if (digitalRead(botaoCinza) == LOW) { iniciarAndar(ledCinza); }
+    else if (digitalRead(botaoAzul) == LOW) { iniciarAndar(ledAzul); }
+    else if (digitalRead(botaoMarrom) == LOW) { iniciarAndar(ledMarrom); }
   }
 
-  // LED VERMELHO
-  if (digitalRead(botaoVermelho) == LOW)
-  {
-    apagarTodos();
-    delay(200);
-    digitalWrite(ledVermelho, HIGH);
-    delay(5000);
-    digitalWrite(ledVermelho, LOW);
+  // Se estiver em movimento, conta o tempo sem travar o Arduino
+  if (elevadorEmUso) {
+    if (millis() - tempoInicio >= tempoEspera) {
+      digitalWrite(andarDestino, LOW); // Desliga o led do andar
+      elevadorEmUso = false;           // Libera o elevador para a próxima chamada
+    }
   }
+}
 
-  // LED AMARELO
-  if (digitalRead(botaoAmarelo) == LOW)
-  {
-    apagarTodos();
-    delay(200);
-    digitalWrite(ledAmarelo, HIGH);
-    delay(5000);
-    digitalWrite(ledAmarelo, LOW);
-  }
-
-  // LED CINZA
-  if (digitalRead(botaoCinza) == LOW)
-  {
-    apagarTodos();
-    delay(200);
-    digitalWrite(ledCinza, HIGH);
-    delay(5000);
-    digitalWrite(ledCinza, LOW);
-  }
-
-  // LED AZUL
-  if (digitalRead(botaoAzul) == LOW)
-  {
-    apagarTodos();
-    delay(200);
-    digitalWrite(ledAzul, HIGH);
-    delay(5000);
-    digitalWrite(ledAzul, LOW);
-  }
-
-  // MARROM
-  if (digitalRead(botaoMarrom) == LOW)
-  {
-    apagarTodos();
-    delay(200);
-    digitalWrite(ledMarrom, HIGH);
-    delay(5000);
-    digitalWrite(ledMarrom, LOW);
-  }
+// Função para iniciar a viagem
+void iniciarAndar(int ledAndar) {
+  apagarTodos();                 // Limpa painel
+  andarDestino = ledAndar;       // Memoriza o andar que deve acender
+  digitalWrite(andarDestino, HIGH); // Liga o led do andar
+  tempoInicio = millis();        // Zera o cronômetro
+  elevadorEmUso = true;          // Trava o elevador neste estado
 }
 
 // FUNÇÃO PARA APAGAR TODOS OS LEDS
-void apagarTodos()
-{
+void apagarTodos() {
   digitalWrite(ledVerde, LOW);
   digitalWrite(ledVermelho, LOW);
   digitalWrite(ledAmarelo, LOW);
